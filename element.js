@@ -127,7 +127,6 @@ Element.prototype.setBackgroundCanvas = function(object){
                 
                 /* get the position classes */
                 let xy = getCoordinates();
-                console.log(xy);
                 context.drawImage(object, xy[0], xy[1]);
         }
         
