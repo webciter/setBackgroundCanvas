@@ -30,9 +30,11 @@ To reposition the image use two classes on the canvas element, both x and y clas
 
 9 positions are possible
  
+ <pre>
  xl yt, xc yt, xr yt
  xl yc, xc yc, xr yc
  xl yb, xc yb, xr yb
+ </pre>
  
  So for a center image use 
  
