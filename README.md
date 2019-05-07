@@ -3,7 +3,7 @@ Sets an Image as the background of any Element using a single function.
 
 This functions allows you to apply an image behind all element children. By using this function you will have far more control over your 
 image. The main reason for this was to allow opacity over an still background image without effecting nested elements. 
-Now each nested element can have its own opacity.
+Now each nested element can have its own opacity use setAlpha project for this
 
 <pre>
         /* create the image */
