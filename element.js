@@ -105,7 +105,7 @@ Element.prototype.setBackgroundCanvas = function(object){
         }else{
             xy = null;
         }
-        console.log(x,y);
+        
         if(xy === null){
             throw "Unable to detect background position classes in canvas";
             return [0,0];
@@ -134,7 +134,7 @@ Element.prototype.setBackgroundCanvas = function(object){
     }
     
     let reFresh = function(event){
-        console.log(calculateZIndex());
+        
         /* when the window resizes recalculate the width and height */
         let styles = window.getComputedStyle(element), 
             replace = /[px]/g;
