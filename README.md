@@ -24,7 +24,7 @@ Now each nested element can have its own opacity use setAlpha project for this
 </pre>
 
 
-#Positioning
+<h2>positioning</h2>
 
 To reposition the image use two classes on the canvas element, both x and y classes are needed.
 
