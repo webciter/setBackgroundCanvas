@@ -40,7 +40,8 @@ To reposition the image use two classes on the canvas element, both x and y clas
  
 <pre>
 /* center image */
- document.getElementById("your_block_level_element").classList.add("xc yc");
+ document.getElementById("your_block_level_element").getBackgroundCanvas.classList.add("xc yc");
+ 
 </pre>
  
  
