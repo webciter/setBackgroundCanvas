@@ -185,7 +185,6 @@ Element.prototype.setBackgroundCanvas = function(object){
         _reDraw();
     };
     
-    /* get the width and hight of the element in use */
     window.addEventListener("resize", reFresh);
     
     /* monitor the element nested elemetns for changes then redraw */
