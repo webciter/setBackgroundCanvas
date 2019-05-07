@@ -1,5 +1,41 @@
 /* Code By David Clews */
 
+window.MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
+
+/*
+ * min
+ * 
+ * Get the lowest value from an array
+ * 
+ * @param {type} array
+ * @returns {integer}
+ */
+Array.min = function( array ){
+    return Math.min.apply( Math, array );
+};
+
+/*
+* containsMany
+* 
+* Allows multiple classes to be checked for a single boolean
+* 
+* @param {string} classes
+* @return {boolean}
+*/
+DOMTokenList.prototype.containsMany = function(classes) {
+  var items = classes.split(' ');
+
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+
+    if (this.contains(item) == false) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 /*
  * setBackgroundCanvas
  * 
@@ -181,3 +217,5 @@ Element.prototype.setBackgroundCanvas = function(object){
 
     return context;
 }
+
+
