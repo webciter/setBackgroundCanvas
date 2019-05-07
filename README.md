@@ -22,3 +22,25 @@ Now each nested element can have its own opacity.
            
 
 </pre>
+
+
+#Positioning
+
+To reposition the image use two classes on the canvas element, both x and y classes are needed.
+
+9 positions are possible
+ 
+ xl yt, xc yt, xr yt
+ xl yc, xc yc, xr yc
+ xl yb, xc yb, xr yb
+ 
+ So for a center image use 
+ 
+<pre>
+/* center image */
+ document.getElementById("your_block_level_element").classList.add("xc yc");
+</pre>
+ 
+ 
+
+ 
