@@ -218,4 +218,13 @@ Element.prototype.setBackgroundCanvas = function(object){
     return context;
 }
 
-
+/**
+ * getBackgroundCanvas
+ * 
+ * Gets the {HTMLCanvasElement} that hold the background object
+ * 
+ * @returns {HTMLCanvasElement|null}
+ */
+Element.getBackgroundCanvas = function(){
+    return document.getElementsByClassName("backgroundCanvas")[0] || null;
+}
