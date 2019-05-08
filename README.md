@@ -50,7 +50,7 @@ To reposition the image use two classes on the canvas element, both x and y clas
  
  <pre>
   /* 50% Opacity */
-  document.getElementById("your_block_level_element").getBackgroundCanvas().opacity = 0.5;
+  document.getElementById("your_block_level_element").getBackgroundCanvas().style.opacity = 0.5;
 
  </pre>
  
