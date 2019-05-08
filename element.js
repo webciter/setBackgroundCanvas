@@ -209,7 +209,7 @@ Element.prototype.setBackgroundCanvas = function(object){
     canvas.style.left = "0px";
     canvas.style.top = "0px";
     
-    canvas.classList.add('backgroundImage','xl','yt');
+    canvas.classList.add('backgroundCanvas','xl','yt');
     
     this.appendChild(canvas);
     reFresh();
