@@ -3,7 +3,7 @@ Sets an Image as the background of any Element using a single function.
 
 This functions allows you to apply an image behind all element children. By using this function you will have far more control over your 
 image. The main reason for this was to allow opacity over an still background image without effecting nested elements. 
-Now each nested element can have its own opacity use setAlpha project for this
+Now each nested element can have its own alpha use setAlpha project for this. Use the opacity rule for this canvas.
 
 <pre>
         /* create the image */
@@ -44,6 +44,15 @@ To reposition the image use two classes on the canvas element, both x and y clas
  
 </pre>
  
+ <h2>Opacity</h2>
+ 
+ Use the opacity rule, inheritance will not be effected as it's on it own branch.
+ 
+ <pre>
+  /* 50% Opacity */
+  document.getElementById("your_block_level_element").getBackgroundCanvas().opacity = 0.5;
+
+ </pre>
  
 
  
