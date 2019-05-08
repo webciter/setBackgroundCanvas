@@ -87,7 +87,7 @@ Element.prototype.setBackgroundCanvas = function(object){
      * @return {integer} The z-index value to use 1 below minimum 
      */
     let calculateZIndex = function(){
-        let nestedElements = self.querySelectorAll("*:not(.backgroundImage)"),
+        let nestedElements = self.querySelectorAll("*:not(.backgroundCanvas)"),
                 zIndexes = [];
         
        
