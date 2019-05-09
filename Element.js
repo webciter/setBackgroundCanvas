@@ -1,4 +1,6 @@
-/* Code By David Clews */
+/* Code By David Clews
+   http://davidclews.com
+*/
 
 require('array-functions-min');
 require('dom_token_list-functions-contains_all');
