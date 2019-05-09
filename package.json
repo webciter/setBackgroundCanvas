@@ -1,11 +1,11 @@
 {
-  "name": "webciter/setBackgroundCanvas",
+  "name": "element-functions-set_background_canvas",
   "version": "1.0.0",
   "description": "",
   "main": "Element.js",
   "dependencies": {
-    "arrayMin": "webciter/arrayMin",
-    "containsAll": "webciter/containsAll",
+    "arrayMin": "array-functions-min",
+    "containsAll": "dom_token_list-functions-contains_all",
   },
   "scripts": {
   },
