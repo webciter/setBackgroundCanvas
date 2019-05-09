@@ -5,7 +5,7 @@
   "main": "Element.js",
   "dependencies": {
     "arrayMin": "array-functions-min",
-    "containsAll": "dom_token_list-functions-contains_all",
+    "containsAll": "dom_token_list-functions-contains_all"
   },
   "scripts": {
   },
