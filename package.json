@@ -4,8 +4,8 @@
   "description": "",
   "main": "Element.js",
   "dependencies": {
-    "arrayMin": "array-functions-min",
-    "containsAll": "dom_token_list-functions-contains_all"
+    "array-functions-min": "1.0.0",
+    "dom_token_list-functions-contains_all": "1.0.0"
   },
   "scripts": {
   },
