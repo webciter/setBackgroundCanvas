@@ -2,39 +2,6 @@
 
 window.MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
 
-/*
- * min
- * 
- * Get the lowest value from an array
- * 
- * @param {type} array
- * @returns {integer}
- */
-Array.min = function( array ){
-    return Math.min.apply( Math, array );
-};
-
-/*
-* containsMany
-* 
-* Allows multiple classes to be checked for a single boolean
-* 
-* @param {string} classes
-* @return {boolean}
-*/
-DOMTokenList.prototype.containsMany = function(classes) {
-  var items = classes.split(' ');
-
-  for (var i = 0; i < items.length; i++) {
-    var item = items[i];
-
-    if (this.contains(item) == false) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 /*
  * setBackgroundCanvas
@@ -120,23 +87,23 @@ Element.prototype.setBackgroundCanvas = function(object){
         
         let xy;
         
-        if(canvas.classList.containsMany("xl yt")){
+        if(canvas.classList.containsAll("xl yt")){
             xy = [0,0];
-        }else if(canvas.classList.containsMany("xc yt")){
+        }else if(canvas.classList.containsAll("xc yt")){
             xy = [x.c,y.t];
-        }else if(canvas.classList.containsMany("xr yt")){
+        }else if(canvas.classList.containsAll("xr yt")){
             xy = [x.r,y.t];
-        }else if(canvas.classList.containsMany("xl yc")){
+        }else if(canvas.classList.containsAll("xl yc")){
             xy = [x.l,y.c];
-        }else if(canvas.classList.containsMany("xc yc")){
+        }else if(canvas.classList.containsAll("xc yc")){
             xy = [x.c,y.c];
-        }else if(canvas.classList.containsMany("xr yc")){
+        }else if(canvas.classList.containsAll("xr yc")){
             xy = [x.r,y.c];
-        }else if(canvas.classList.containsMany("xl yb")){
+        }else if(canvas.classList.containsAll("xl yb")){
             xy = [x.l,y.b];
-        }else if(canvas.classList.containsMany("xc yb")){
+        }else if(canvas.classList.containsAll("xc yb")){
             xy = [x.c,y.b];
-        }else if(canvas.classList.containsMany("xr yb")){
+        }else if(canvas.classList.containsAll("xr yb")){
             xy = [x.r,y.b];
         }else{
             xy = null;
