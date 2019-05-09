@@ -1,0 +1,21 @@
+{
+  "name": "webciter/setBackgroundCanvas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Element.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webciter/setBackgroundCanvas.git"
+  },
+  "keywords": [
+    "canvas","transparency"
+  ],
+  "author": "David Clews",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/webciter/setBackgroundCanvas/issues"
+  },
+  "homepage": "https://github.com/webciter/setBackgroundCanvas#readme"
+}
