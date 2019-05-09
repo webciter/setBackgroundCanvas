@@ -6,7 +6,7 @@
   "dependencies": {
     "arrayMin": "webciter/arrayMin",
     "containsAll": "webciter/containsAll",
-  }
+  },
   "scripts": {
   },
   "repository": {
