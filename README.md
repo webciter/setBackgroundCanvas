@@ -30,6 +30,12 @@ containsAll https://github.com/webciter/containsAll
 arrayMin https://github.com/webciter/arrayMin
 </pre>
 
+<h2>Installation</h2>
+
+<pre>
+npm i element-functions-set_background_canvas
+</pre>
+
 <h2>Positioning</h2>
 
 To reposition the image use two classes on the canvas element, both x and y classes are needed.
