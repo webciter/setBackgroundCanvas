@@ -25,8 +25,10 @@ Now each nested element can have its own alpha use setAlpha project for this. Us
 
 <h2>Requires</h2>
 
+<pre>
 containsAll
 arrayMin
+</pre>
 
 <h2>Positioning</h2>
 
