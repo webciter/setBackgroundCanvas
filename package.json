@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "Element.js",
+  "dependencies": {
+    "arrayMin": "webciter/arrayMin",
+    "containsAll": "webciter/containsAll",
+  }
   "scripts": {
   },
   "repository": {
