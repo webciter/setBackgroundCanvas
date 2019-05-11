@@ -133,9 +133,30 @@ Element.prototype.setBackgroundCanvas = function(object){
                 /* update the new position */
                 calculatePositions();
                 
-                /* get the position classes */
-                let xy = getCoordinates();
-                context.drawImage(object, xy[0], xy[1]);
+                /* detect repeat */ 
+
+		if(canvas.classList.contains("xx") && canvas.classList.contains("yy") === false){
+                    /* x axis only */
+                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillRect(0, 0, canvas.width, height);
+		}else if(canvas.classList.contains("xx") === false && canvas.classList.contains("yy")){
+                    /* y axis only */
+                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillRect(0, 0, width, canvas.height);
+
+		}else if(canvas.classList.containsAll("xx yy")){
+                    /* x and y axis */
+                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+		}else{
+                    /* no repeat */
+
+                    /* get the position classes */
+                    let xy = getCoordinates();
+
+                    context.drawImage(object, xy[0], xy[1]);
+		}
+
         }
         
     }
