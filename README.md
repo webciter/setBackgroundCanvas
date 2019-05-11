@@ -72,10 +72,10 @@ To reposition the image use two classes on the canvas element, both x and y clas
 /* only on the x axis */
  document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xx");
 
-/* only on the x axis */
+/* only on the y axis */
  document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("yy");
 
-/* both axis essentially tile cover */
+/* both axis, essentially tile cover */
  document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xx yy");
 
 </pre>
