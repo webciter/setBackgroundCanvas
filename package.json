@@ -1,6 +1,6 @@
 {
   "name": "element-functions-set_background_canvas",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "main": "Element.js",
   "dependencies": {
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/webciter/setBackgroundCanvas.git"
+    "url": "git+https://github.com/webciter/setBackgroundCanvas.git#1.0.3"
   },
   "keywords": [
     "canvas","transparency"

@@ -1,0 +1,97 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'publish' ]
+2 info using npm@3.5.2
+3 info using node@v8.10.0
+4 verbose publish [ '.' ]
+5 silly cache add args [ '.', null ]
+6 verbose cache add spec .
+7 silly cache add parsed spec Result {
+7 silly cache add   raw: '.',
+7 silly cache add   scope: null,
+7 silly cache add   name: null,
+7 silly cache add   rawSpec: '.',
+7 silly cache add   spec: '/home/david/Documents/git/setBackgroundCanvas/1.0.3',
+7 silly cache add   type: 'directory' }
+8 verbose addLocalDirectory /home/david/.npm/element-functions-set_background_canvas/1.0.2/package.tgz not in flight; packing
+9 info lifecycle element-functions-set_background_canvas@1.0.2~prepublish: element-functions-set_background_canvas@1.0.2
+10 silly lifecycle element-functions-set_background_canvas@1.0.2~prepublish: no script for prepublish, continuing
+11 verbose tar pack [ '/home/david/.npm/element-functions-set_background_canvas/1.0.2/package.tgz',
+11 verbose tar pack   '/home/david/Documents/git/setBackgroundCanvas/1.0.3' ]
+12 verbose tarball /home/david/.npm/element-functions-set_background_canvas/1.0.2/package.tgz
+13 verbose folder /home/david/Documents/git/setBackgroundCanvas/1.0.3
+14 verbose addLocalTarball adding from inside cache /home/david/.npm/element-functions-set_background_canvas/1.0.2/package.tgz
+15 silly cache afterAdd element-functions-set_background_canvas@1.0.2
+16 verbose afterAdd /home/david/.npm/element-functions-set_background_canvas/1.0.2/package/package.json not in flight; writing
+17 verbose afterAdd /home/david/.npm/element-functions-set_background_canvas/1.0.2/package/package.json written
+18 silly publish { name: 'element-functions-set_background_canvas',
+18 silly publish   version: '1.0.2',
+18 silly publish   description: 'Sets an Image as the background of any Element using a single function.',
+18 silly publish   main: 'Element.js',
+18 silly publish   dependencies:
+18 silly publish    { 'array-functions-min': '1.0.0',
+18 silly publish      'dom_token_list-functions-contains_all': '1.0.0' },
+18 silly publish   scripts: {},
+18 silly publish   repository:
+18 silly publish    { type: 'git',
+18 silly publish      url: 'git+https://github.com/webciter/setBackgroundCanvas.git' },
+18 silly publish   keywords: [ 'canvas', 'transparency' ],
+18 silly publish   author: { name: 'David Clews' },
+18 silly publish   license: 'MIT',
+18 silly publish   bugs:
+18 silly publish    { url: 'https://github.com/webciter/setBackgroundCanvas/issues' },
+18 silly publish   homepage: 'https://github.com/webciter/setBackgroundCanvas#readme',
+18 silly publish   readme: '# setBackgroundCanvas\nSets an Image as the background of any Element using a single function.\n\nThis functions allows you to apply an image behind all element children. By using this function you will have far more control over your \nimage. The main reason for this was to allow opacity over an still background image without effecting nested elements. \nNow each nested element can have its own alpha use setAlpha project for this. Use the opacity rule for the canvas.\n\n<pre>\n        /* create the image */\n        var img1 = new Image();\n\n        //drawing of the test image - img1\n        img1.onload = function () {\n            //draw background image\n            \n            /* run the function with the object */\n            document.getElementById("your_block_level_element").setBackgroundCanvas(img1);\n\n        };\n\n        img1.src = \'https://upload.wikimedia.org/wikipedia/commons/9/9b/The.Matrix.glmatrix.2.png\';\n           \n\n</pre>\n\n<h2>Requires</h2>\n\n<pre>\ncontainsAll https://github.com/webciter/containsAll\narrayMin https://github.com/webciter/arrayMin\n</pre>\n\n<h2>Installation</h2>\n\n<pre>\nnpm i element-functions-set_background_canvas\n</pre>\n\n<h2>Positioning</h2>\n\nTo reposition the image use two classes on the canvas element, both x and y classes are needed.\n\n9 positions are possible\n \n <pre>\n xl yt, xc yt, xr yt\n xl yc, xc yc, xr yc\n xl yb, xc yb, xr yb\n </pre>\n \n So for a center image use \n \n<pre>\n/* center image */\n document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xc yc");\n \n</pre>\n \n <h2>Opacity</h2>\n \n Use the opacity rule, inheritance will not be effected as it\'s on it own branch.\n \n <pre>\n  /* 50% Opacity */\n  document.getElementById("your_block_level_element").getBackgroundCanvas().style.opacity = 0.5;\n\n </pre>\n\n<h2>Repeat</h2>\n\n<pre>\n/* only on the x axis */\n document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xx");\n\n/* only on the y axis */\n document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("yy");\n\n/* both axis, essentially tile cover */\n document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xx yy");\n\n</pre>\n \n\n \n',
+18 silly publish   readmeFilename: 'README.md',
+18 silly publish   gitHead: '5beac31e7c375be6f4fcdafbf5cb1d10800bbbad',
+18 silly publish   _id: 'element-functions-set_background_canvas@1.0.2',
+18 silly publish   _shasum: 'd84497c0961362f1618ed3eea1b117e7f753e619',
+18 silly publish   _from: '.' }
+19 verbose getPublishConfig undefined
+20 silly mapToRegistry name element-functions-set_background_canvas
+21 silly mapToRegistry using default registry
+22 silly mapToRegistry registry https://registry.npmjs.org/
+23 silly mapToRegistry uri https://registry.npmjs.org/element-functions-set_background_canvas
+24 verbose publish registryBase https://registry.npmjs.org/
+25 silly publish uploading /home/david/.npm/element-functions-set_background_canvas/1.0.2/package.tgz
+26 verbose request uri https://registry.npmjs.org/element-functions-set_background_canvas
+27 verbose request sending authorization for write operation
+28 info attempt registry request try #1 at 11:17:17
+29 verbose request using bearer token for auth
+30 verbose request id 8668b2d7c887b426
+31 http request PUT https://registry.npmjs.org/element-functions-set_background_canvas
+32 http 403 https://registry.npmjs.org/element-functions-set_background_canvas
+33 verbose headers { date: 'Sat, 11 May 2019 10:17:18 GMT',
+33 verbose headers   'content-type': 'application/json',
+33 verbose headers   'transfer-encoding': 'chunked',
+33 verbose headers   connection: 'keep-alive',
+33 verbose headers   'set-cookie':
+33 verbose headers    [ '__cfduid=d92628a58578fc50470db38a79d937e511557569837; expires=Sun, 10-May-20 10:17:17 GMT; path=/; domain=.registry.npmjs.org; HttpOnly' ],
+33 verbose headers   'cf-ray': '4d5366fce8976aa7-LHR',
+33 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+33 verbose headers   vary: 'Accept-Encoding',
+33 verbose headers   server: 'cloudflare',
+33 verbose headers   'content-encoding': 'gzip' }
+34 verbose request invalidating /home/david/.npm/registry.npmjs.org/element-functions-set_background_canvas on PUT
+35 error publish Failed PUT 403
+36 verbose stack Error: You cannot publish over the previously published versions: 1.0.2. : element-functions-set_background_canvas
+36 verbose stack     at makeError (/usr/share/npm/node_modules/npm-registry-client/lib/request.js:264:12)
+36 verbose stack     at CachingRegistryClient.<anonymous> (/usr/share/npm/node_modules/npm-registry-client/lib/request.js:252:14)
+36 verbose stack     at /usr/share/npm/node_modules/npm-registry-client/lib/request.js:178:7
+36 verbose stack     at Gunzip.onEnd (zlib.js:131:5)
+36 verbose stack     at emitNone (events.js:111:20)
+36 verbose stack     at Gunzip.emit (events.js:208:7)
+36 verbose stack     at endReadableNT (_stream_readable.js:1064:12)
+36 verbose stack     at _combinedTickCallback (internal/process/next_tick.js:138:11)
+36 verbose stack     at process._tickCallback (internal/process/next_tick.js:180:9)
+37 verbose statusCode 403
+38 verbose pkgid element-functions-set_background_canvas
+39 verbose cwd /home/david/Documents/git/setBackgroundCanvas/1.0.3
+40 error Linux 4.15.0-47-generic
+41 error argv "/usr/bin/node" "/usr/bin/npm" "publish"
+42 error node v8.10.0
+43 error npm  v3.5.2
+44 error code E403
+45 error You cannot publish over the previously published versions: 1.0.2. : element-functions-set_background_canvas
+46 error If you need help, you may report this error at:
+46 error     <https://github.com/npm/npm/issues>
+47 verbose exit [ 1, true ]
