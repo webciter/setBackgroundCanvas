@@ -40,8 +40,8 @@ Now each nested element can have its own alpha use setAlpha project for this. Us
             }, false);
 </pre>
 
-<h2>BackgroundCanvasLoaded</h2>
-<h3>Event</h3>
+<h2>Event</h2>
+<h3>BackgroundCanvasLoaded</h3>
 
 <pre>
 
