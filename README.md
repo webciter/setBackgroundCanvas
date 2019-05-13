@@ -5,6 +5,7 @@ This functions allows you to apply an image behind all element children. By usin
 image. The main reason for this was to allow opacity over an still background image without effecting nested elements. 
 Now each nested element can have its own alpha use setAlpha project for this. Use the opacity rule for the canvas.
 
+<h2>Image Example</h2>
 <pre>
         /* create the image */
         var img1 = new Image();
@@ -19,7 +20,40 @@ Now each nested element can have its own alpha use setAlpha project for this. Us
         };
 
         img1.src = 'https://upload.wikimedia.org/wikipedia/commons/9/9b/The.Matrix.glmatrix.2.png';
-           
+
+</pre>
+
+<h2>Video Example</h2>
+<pre>
+            var vid1 = document.createElement("video");
+            vid1.id = "vid_1";
+            vid1.src = "http://your_video_url.com/video.mp4";
+            vid1.muted = true; 
+            var vw,vh;
+            vid1.addEventListener("loadedmetadata", function() {
+                document.getElementById("your_block_level_element").setBackgroundCanvas(this);
+			/* you can use a timer for a delay */
+                    setTimeout(function(){
+                        vid1.play();
+                    }, 5000)
+
+            }, false);
+</pre>
+
+<h2>BackgroundCanvasLoaded</h2>
+<h3>Event</h3>
+
+<pre>
+
+document.getElementById("your_block_level_element").addEventListener("BackgroundCanvasLoaded", function(event){
+           // apply the settings 
+           event.target.getBackgroundCanvas().classList.add("x-x","y-y");
+
+           // set the opacity if you wish
+           event.target.getBackgroundCanvas().style.opacity = 0.5;
+
+           event.target.reFresh();
+});
 
 </pre>
 
@@ -55,6 +89,17 @@ To reposition the image use two classes on the canvas element, both x and y clas
  document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xc yc");
  
 </pre>
+
+ <h2>Stretch</h2>
+
+ The object ether image, video can be stretched over the element, using the following classes. aspect ratio is ignored.
+
+ <pre>
+ x-x - x axis only
+ y-y - y axis only
+ xy-xy - both axis
+ </pre>
+ 
  
  <h2>Opacity</h2>
  

@@ -20,7 +20,7 @@ window.MutationObserver = window.MutationObserver || window.WebKitMutationObserv
 Element.prototype.setBackgroundCanvas = function(object){
     
     
-    let 
+     let 
     self = this,
     x = {
         l: 0, /* left*/
@@ -33,8 +33,7 @@ Element.prototype.setBackgroundCanvas = function(object){
         b: 0, /* bottom */
     }
     
-    
-    
+
     /* position grid */
     
     /*********
@@ -45,11 +44,11 @@ Element.prototype.setBackgroundCanvas = function(object){
      */
     
     
-    let element = this, 
+    let element = self, 
             elementWidth, 
             elementHeight,
             canvas = document.createElement("canvas"), 
-            context = canvas.getContext("2d");
+            context = canvas.getContext("2d", {alpha: true});
     
     /* 
      * calculateZIndex
@@ -113,7 +112,7 @@ Element.prototype.setBackgroundCanvas = function(object){
         }else{
             xy = null;
         }
-        
+
         if(xy === null){
             throw "Unable to detect background position classes in canvas";
             return [0,0];
@@ -125,16 +124,16 @@ Element.prototype.setBackgroundCanvas = function(object){
     
     /* image */
     if(object instanceof HTMLImageElement){
+
+        /* still image redraw */
         var _reDraw = function(){
             let width = object.width,
                 height = object.height;
                 canvas.style.zIndex = calculateZIndex();
-                
                 /* update the new position */
                 calculatePositions();
                 
                 /* detect repeat */ 
-
 		if(canvas.classList.contains("xx") && canvas.classList.contains("yy") === false){
                     /* x axis only */
                     context.fillStyle = context.createPattern(object, "repeat");
@@ -143,80 +142,139 @@ Element.prototype.setBackgroundCanvas = function(object){
                     /* y axis only */
                     context.fillStyle = context.createPattern(object, "repeat");
                     context.fillRect(0, 0, width, canvas.height);
-
 		}else if(canvas.classList.containsAll("xx yy")){
                     /* x and y axis */
                     context.fillStyle = context.createPattern(object, "repeat");
                     context.fillRect(0, 0, canvas.width, canvas.height);
+                }else if(canvas.classList.contains("x-x")){
+                    /* stretch x */
+                    /* dont't call getCoordinates don't need it for stretch as all images are rendered at the top left corner */
+                    context.drawImage(object, 0, 0, width, height,0,0, elementWidth, height);
+                }else if(canvas.classList.containsAll("y-y")){
+                    /* stretch y */
+                    context.drawImage(object, 0, 0, width, height, 0, 0, width, elementHeight);
+                }else if(canvas.classList.containsAll("xy-xy")){
+                    /* x and y axis stretch */
+                    context.drawImage(object, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
 		}else{
-                    /* no repeat */
+                    /* no repeat - no stretch */
 
                     /* get the position classes */
                     let xy = getCoordinates();
 
                     context.drawImage(object, xy[0], xy[1]);
+
+		}
+                
+               
+
+        }
+    }else if(object instanceof HTMLVideoElement){
+        object.addEventListener("play", function(event){
+           self.reFresh(); 
+        });
+
+        /* video redraw */
+        var _reDraw = function(){
+            let width = object.videoWidth,
+                height = object.videoHeight;
+                canvas.style.zIndex = calculateZIndex();
+                /* update the new position */
+                //calculatePositions();
+                
+                /* detect repeat */ 
+		if(canvas.classList.contains("xx") && canvas.classList.contains("yy") === false){
+                    /* x axis only */
+                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillRect(0, 0, canvas.width, height);
+                    window.requestAnimationFrame(_reDraw);
+		}else if(canvas.classList.contains("xx") === false && canvas.classList.contains("yy")){
+                    /* y axis only */
+                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillRect(0, 0, width, canvas.height);
+                    window.requestAnimationFrame(_reDraw);
+		}else if(canvas.classList.containsAll("xx yy")){
+                    /* x and y axis */
+                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    window.requestAnimationFrame(_reDraw);
+                }else if(canvas.classList.contains("x-x")){
+                    /* stretch x */
+                    /* dont't call getCoordinates don't need it for stretch as all images are rendered at the top left corner */
+                    context.drawImage(object, 0, 0, width, height,0,0, elementWidth, height);
+                    window.requestAnimationFrame(_reDraw);
+
+                }else if(canvas.classList.containsAll("y-y")){
+                    /* stretch y */
+                    context.drawImage(object, 0, 0, width, height, 0, 0, width, elementHeight);
+                    window.requestAnimationFrame(_reDraw);
+
+                }else if(canvas.classList.containsAll("xy-xy")){
+                    /* x and y axis stretch */
+                    context.drawImage(object, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
+                    window.requestAnimationFrame(_reDraw);
+		}else{
+                    /* no repeat - no stretch */
+
+                    /* get the position classes */
+                    let xy = getCoordinates();
+
+                    context.drawImage(object, 0, 0);
+                    window.requestAnimationFrame(_reDraw);
 		}
 
         }
-        
+    }else{
+        throw "Unable to detect the Element Type";
     }
     
-    let reFresh = function(event){
-        
+    self.reFresh = function(event){
+        console.log("refresh");
         /* when the window resizes recalculate the width and height */
         let styles = window.getComputedStyle(element), 
             replace = /[px]/g;
         
         /* updates the canvas based on media queries and resize */
         
-        elementWidth = styles.getPropertyValue("width").replace(replace,'');
-        elementHeight = styles.getPropertyValue("height").replace(replace,'');
-
+        elementWidth = styles.getPropertyValue("width").replace(replace,'')-styles.getPropertyValue("border-left-width").replace(replace,'')-styles.getPropertyValue("border-right-width").replace(replace,'');
+        elementHeight = styles.getPropertyValue("height").replace(replace,'')-styles.getPropertyValue("border-top-width").replace(replace,'')-styles.getPropertyValue("border-bottom-width").replace(replace,'');
         canvas.setAttribute("width", elementWidth+"px");
         canvas.setAttribute("height", elementHeight+"px");
+        
+        /* 100% canvas */
+        canvas.style.position = "absolute";
+        canvas.style.left = "-"+styles.getPropertyValue("border-left-width").replace(replace,'')+"px";
+        canvas.style.top = "-"+styles.getPropertyValue("border-top-width").replace(replace,'')+"px";
         
         _reDraw();
     };
     
-    window.addEventListener("resize", reFresh);
-    
-    /* monitor the element nested elemetns for changes then redraw */
-    let config = { attributes: true, childList: true, subtree: false },
-            callback = function(mutationsList, observer) {
-                for(var mutation of mutationsList) {
-                    /* wait for changes here */
-                    if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                        _reDraw();
-                    }
-                }
-            }
-    
-    // Create an observer instance linked to the callback function
-    var elementObserver = new MutationObserver(callback);
+    window.addEventListener("resize", self.reFresh);
 
-    // Start observing the target node for configured mutations
-    elementObserver.observe(self, config);
-    
-    /* 100% canvas */
-    canvas.style.position = "absolute";
-    canvas.style.left = "0px";
-    canvas.style.top = "0px";
-    
-    canvas.classList.add('backgroundCanvas','xl','yt');
-    
-    this.appendChild(canvas);
-    reFresh();
 
-    return context;
+    element.appendChild(canvas);
+    canvas.classList.add("backgroundCanvas");
+
+    /**
+     * getBackgroundCanvas
+     * 
+     * Gets the {HTMLCanvasElement} that hold the background object
+     * 
+     * @returns {HTMLCanvasElement|null}
+     */
+    self.getBackgroundCanvas = function(){
+        return canvas || null;
+    }
+    
+    /* tell the view when the background canvas has been added */ 
+    let event =  new Event('BackgroundCanvasLoaded');
+
+    // Dispatch the event.
+    element.dispatchEvent(event);
+
+    self.reFresh();
+
+
 }
 
-/**
- * getBackgroundCanvas
- * 
- * Gets the {HTMLCanvasElement} that hold the background object
- * 
- * @returns {HTMLCanvasElement|null}
- */
-Element.getBackgroundCanvas = function(){
-    return document.getElementsByClassName("backgroundCanvas")[0] || null;
-}
+
