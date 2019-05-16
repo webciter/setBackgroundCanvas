@@ -1,8 +1,7 @@
 # setBackgroundCanvas
-Sets an Image as the background of any Element using a single function.
+Sets an Image or Video as the background of any Element using a single function.
 
-This functions allows you to apply an image behind all element children. By using this function you will have far more control over your 
-image. The main reason for this was to allow opacity over an still background image without effecting nested elements. 
+This functions allows you to apply a image or video behind all element children. By using this function you will have far more control. The main reason for this was to allow opacity over an still background image without effecting nested elements. 
 Now each nested element can have its own alpha use setAlpha project for this. Use the opacity rule for the canvas.
 
 <h2>Image Example</h2>
@@ -40,6 +39,38 @@ Now each nested element can have its own alpha use setAlpha project for this. Us
             }, false);
 </pre>
 
+<h2>Change Canvas Object</h2>
+
+<pre>
+    /* create the image */
+    var img1 = new Image();
+
+    //drawing of the test image - img1
+    img1.onload = function () {
+        //draw background image
+        
+        /* run the function with the object */
+        document.getElementById("col_1").changeBackgroundCanvas(img1);
+	document.getElementById("col_1").canvas.reFresh();
+    };
+
+    img1.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/The_Earth_seen_from_Apollo_17.jpg/1024px-The_Earth_seen_from_Apollo_17.jpg';
+</pre>
+
+<h2>Canvas Element</h2>
+
+You can access the canvas element directly by using 
+
+<pre>element.canvas.element</pre>
+
+<h2>Refresh</h2>
+
+You can access the reFresh function if you have any refreshing issues with
+
+<pre>
+element.canvas.reFresh();
+</pre>
+
 <h2>Event</h2>
 <h3>BackgroundCanvasLoaded</h3>
 
@@ -47,12 +78,12 @@ Now each nested element can have its own alpha use setAlpha project for this. Us
 
 document.getElementById("your_block_level_element").addEventListener("BackgroundCanvasLoaded", function(event){
            // apply the settings 
-           event.target.getBackgroundCanvas().classList.add("x-x","y-y");
+           event.target.canvas.element.classList.add("x-x","y-y");
 
            // set the opacity if you wish
-           event.target.getBackgroundCanvas().style.opacity = 0.5;
+           event.target.canvas.element.style.opacity = 0.5;
 
-           event.target.reFresh();
+           event.target.canvas.reFresh();
 });
 
 </pre>
@@ -86,7 +117,7 @@ To reposition the image use two classes on the canvas element, both x and y clas
  
 <pre>
 /* center image */
- document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xc yc");
+ document.getElementById("your_block_level_element").canvas.element.classList.add("xc yc");
  
 </pre>
 
@@ -107,7 +138,7 @@ To reposition the image use two classes on the canvas element, both x and y clas
  
  <pre>
   /* 50% Opacity */
-  document.getElementById("your_block_level_element").getBackgroundCanvas().style.opacity = 0.5;
+  document.getElementById("your_block_level_element").canvas.element.style.opacity = 0.5;
 
  </pre>
 
@@ -115,13 +146,13 @@ To reposition the image use two classes on the canvas element, both x and y clas
 
 <pre>
 /* only on the x axis */
- document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xx");
+ document.getElementById("your_block_level_element").canvas.element.classList.add("xx");
 
 /* only on the y axis */
- document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("yy");
+ document.getElementById("your_block_level_element").canvas.element.classList.add("yy");
 
 /* both axis, essentially tile cover */
- document.getElementById("your_block_level_element").getBackgroundCanvas().classList.add("xx yy");
+ document.getElementById("your_block_level_element").canvas.element.classList.add("xx yy");
 
 </pre>
  
