@@ -18,9 +18,7 @@ window.MutationObserver = window.MutationObserver || window.WebKitMutationObserv
  * @returns {context}
  */
 Element.prototype.setBackgroundCanvas = function(object){
-    
-    
-     let 
+    let 
     self = this,
     x = {
         l: 0, /* left*/
@@ -33,6 +31,10 @@ Element.prototype.setBackgroundCanvas = function(object){
         b: 0, /* bottom */
     }
     
+    /* hold the object sent into the function */
+    self.backgroundCanvasObject = object;
+    
+    
 
     /* position grid */
     
@@ -44,11 +46,15 @@ Element.prototype.setBackgroundCanvas = function(object){
      */
     
     
-    let element = self, 
-            elementWidth, 
-            elementHeight,
-            canvas = document.createElement("canvas"), 
-            context = canvas.getContext("2d", {alpha: true});
+    let     elementWidth, 
+            elementHeight;
+    
+    /* allow the canvas to be accessed externally */
+    self.canvas = {
+        element: document.createElement("canvas")
+    };
+    
+    self.canvas.context = self.canvas.element.getContext("2d", {alpha: true});
     
     /* 
      * calculateZIndex
@@ -74,22 +80,23 @@ Element.prototype.setBackgroundCanvas = function(object){
     }
     
     let calculatePositions = function(){
+        let canvas = self.canvas.element;
+        
         x.l = 0;
-        x.c = Math.floor(canvas.width/2 - object.width/2);
-        x.r = Math.floor(canvas.width - object.width);
+        x.c = Math.floor(canvas.width/2 - self.backgroundCanvasObject.width/2);
+        x.r = Math.floor(canvas.width - self.backgroundCanvasObject.width);
         
         y.t = 0;
-        y.c = Math.floor(canvas.height/2 - object.height/2);
-        y.b = Math.floor(canvas.height- object.height);
+        y.c = Math.floor(canvas.height/2 - self.backgroundCanvasObject.height/2);
+        y.b = Math.floor(canvas.height- self.backgroundCanvasObject.height);
         console.log(x, y);
     }
     
     let getCoordinates = function(){
         /* make sure we only have one x and y class in the classList */
         
-        
-        
-        let xy;
+        let canvas = self.canvas.element,
+                xy;
         
         if(canvas.classList.containsAll("xl yt")){
             xy = [0,0];
@@ -123,12 +130,14 @@ Element.prototype.setBackgroundCanvas = function(object){
     }
     
     /* image */
-    if(object instanceof HTMLImageElement){
-
+    if(self.backgroundCanvasObject instanceof HTMLImageElement){
+        let     canvas = self.canvas.element,
+                context = self.canvas.context;
+        
         /* still image redraw */
         var _reDraw = function(){
-            let width = object.width,
-                height = object.height;
+            let width = self.backgroundCanvasObject.width,
+                height = self.backgroundCanvasObject.height;
                 canvas.style.zIndex = calculateZIndex();
                 /* update the new position */
                 calculatePositions();
@@ -136,48 +145,50 @@ Element.prototype.setBackgroundCanvas = function(object){
                 /* detect repeat */ 
 		if(canvas.classList.contains("xx") && canvas.classList.contains("yy") === false){
                     /* x axis only */
-                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillStyle = context.createPattern(self.backgroundCanvasObject, "repeat");
                     context.fillRect(0, 0, canvas.width, height);
 		}else if(canvas.classList.contains("xx") === false && canvas.classList.contains("yy")){
                     /* y axis only */
-                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillStyle = context.createPattern(self.backgroundCanvasObject, "repeat");
                     context.fillRect(0, 0, width, canvas.height);
 		}else if(canvas.classList.containsAll("xx yy")){
                     /* x and y axis */
-                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillStyle = context.createPattern(self.backgroundCanvasObject, "repeat");
                     context.fillRect(0, 0, canvas.width, canvas.height);
                 }else if(canvas.classList.contains("x-x")){
                     /* stretch x */
                     /* dont't call getCoordinates don't need it for stretch as all images are rendered at the top left corner */
-                    context.drawImage(object, 0, 0, width, height,0,0, elementWidth, height);
+                    context.drawImage(self.backgroundCanvasObject, 0, 0, width, height,0,0, elementWidth, height);
                 }else if(canvas.classList.containsAll("y-y")){
                     /* stretch y */
-                    context.drawImage(object, 0, 0, width, height, 0, 0, width, elementHeight);
+                    context.drawImage(self.backgroundCanvasObject, 0, 0, width, height, 0, 0, width, elementHeight);
                 }else if(canvas.classList.containsAll("xy-xy")){
                     /* x and y axis stretch */
-                    context.drawImage(object, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
+                    context.drawImage(self.backgroundCanvasObject, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
 		}else{
                     /* no repeat - no stretch */
 
                     /* get the position classes */
                     let xy = getCoordinates();
 
-                    context.drawImage(object, xy[0], xy[1]);
+                    context.drawImage(self.backgroundCanvasObject, xy[0], xy[1]);
 
 		}
                 
                
 
         }
-    }else if(object instanceof HTMLVideoElement){
-        object.addEventListener("play", function(event){
-           self.reFresh(); 
-        });
+    }else if(self.backgroundCanvasObject instanceof HTMLVideoElement){
+        let canvas = self.canvas.element,
+                context = self.canvas.context;
 
+        self.backgroundCanvasObject.addEventListener("play", function(event){
+           reFresh(); 
+        });
         /* video redraw */
         var _reDraw = function(){
-            let width = object.videoWidth,
-                height = object.videoHeight;
+            let width = self.backgroundCanvasObject.videoWidth,
+                height = self.backgroundCanvasObject.videoHeight;
                 canvas.style.zIndex = calculateZIndex();
                 /* update the new position */
                 //calculatePositions();
@@ -185,33 +196,33 @@ Element.prototype.setBackgroundCanvas = function(object){
                 /* detect repeat */ 
 		if(canvas.classList.contains("xx") && canvas.classList.contains("yy") === false){
                     /* x axis only */
-                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillStyle = context.createPattern(self.backgroundCanvasObject, "repeat");
                     context.fillRect(0, 0, canvas.width, height);
                     window.requestAnimationFrame(_reDraw);
 		}else if(canvas.classList.contains("xx") === false && canvas.classList.contains("yy")){
                     /* y axis only */
-                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillStyle = context.createPattern(self.backgroundCanvasObject, "repeat");
                     context.fillRect(0, 0, width, canvas.height);
                     window.requestAnimationFrame(_reDraw);
 		}else if(canvas.classList.containsAll("xx yy")){
                     /* x and y axis */
-                    context.fillStyle = context.createPattern(object, "repeat");
+                    context.fillStyle = context.createPattern(self.backgroundCanvasObject, "repeat");
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     window.requestAnimationFrame(_reDraw);
                 }else if(canvas.classList.contains("x-x")){
                     /* stretch x */
                     /* dont't call getCoordinates don't need it for stretch as all images are rendered at the top left corner */
-                    context.drawImage(object, 0, 0, width, height,0,0, elementWidth, height);
+                    context.drawImage(self.backgroundCanvasObject, 0, 0, width, height,0,0, elementWidth, height);
                     window.requestAnimationFrame(_reDraw);
 
                 }else if(canvas.classList.containsAll("y-y")){
                     /* stretch y */
-                    context.drawImage(object, 0, 0, width, height, 0, 0, width, elementHeight);
+                    context.drawImage(self.backgroundCanvasObject, 0, 0, width, height, 0, 0, width, elementHeight);
                     window.requestAnimationFrame(_reDraw);
 
                 }else if(canvas.classList.containsAll("xy-xy")){
                     /* x and y axis stretch */
-                    context.drawImage(object, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
+                    context.drawImage(self.backgroundCanvasObject, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
                     window.requestAnimationFrame(_reDraw);
 		}else{
                     /* no repeat - no stretch */
@@ -219,19 +230,24 @@ Element.prototype.setBackgroundCanvas = function(object){
                     /* get the position classes */
                     let xy = getCoordinates();
 
-                    context.drawImage(object, 0, 0);
+                    context.drawImage(self.backgroundCanvasObject, 0, 0);
                     window.requestAnimationFrame(_reDraw);
 		}
 
         }
     }else{
+        /* remove object from element */
+        delete self.backgroundCanvasObject;
         throw "Unable to detect the Element Type";
     }
     
-    self.reFresh = function(event){
-        console.log("refresh");
+    
+    
+    let reFresh = function(event){
+        let canvas = self.canvas.element;
+
         /* when the window resizes recalculate the width and height */
-        let styles = window.getComputedStyle(element), 
+        let styles = window.getComputedStyle(self), 
             replace = /[px]/g;
         
         /* updates the canvas based on media queries and resize */
@@ -249,32 +265,60 @@ Element.prototype.setBackgroundCanvas = function(object){
         _reDraw();
     };
     
-    window.addEventListener("resize", self.reFresh);
-
-
-    element.appendChild(canvas);
-    canvas.classList.add("backgroundCanvas");
-
-    /**
-     * getBackgroundCanvas
+    /*
+     * reFresh
      * 
-     * Gets the {HTMLCanvasElement} that hold the background object
+     * Allow external access to the refresh function
      * 
-     * @returns {HTMLCanvasElement|null}
+     * @return {undefined}
      */
-    self.getBackgroundCanvas = function(){
-        return canvas || null;
+    self.canvas.reFresh = function(){
+        reFresh();
     }
     
+    window.addEventListener("resize", reFresh);
+
+    
     /* tell the view when the background canvas has been added */ 
+    
+    /*canvas.classList.add('backgroundCanvas','xl','yt');*/
+
+    self.appendChild(self.canvas.element);
+    self.canvas.element.classList.add("backgroundCanvas");
+    
+    
+    
+    /**
+     * changeBackgroundCanvas
+     * 
+     * Change the background canvas object
+     * 
+     * @param {HTMLImageElement|HTMLVideoElement} object
+     * @returns {undefined}
+     */
+    self.changeBackgroundCanvas = function(object){
+        if(object instanceof HTMLImageElement){
+            self.backgroundCanvasObject = object;
+            reFresh();
+
+        }else if(object instanceof HTMLVideoElement){
+            self.backgroundCanvasObject = object;
+            reFresh();
+
+        }else{
+            delete self.backgroundCanvasObject;
+            throw "Unable to detect the Element Type";
+        }
+    }
+    
+    
     let event =  new Event('BackgroundCanvasLoaded');
 
     // Dispatch the event.
-    element.dispatchEvent(event);
-
-    self.reFresh();
-
+    self.dispatchEvent(event);
+    
+    /* done */
+    reFresh();
 
 }
-
 
