@@ -186,7 +186,6 @@ Element.prototype.setBackgroundCanvas = function(object){
                     }
 
 
-
             }
         }else if(self.backgroundCanvasObject instanceof HTMLVideoElement){
             let canvas = self.canvas.element,
