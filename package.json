@@ -1,6 +1,6 @@
 {
   "name": "element-functions-set_background_canvas",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "main": "Element.js",
   "dependencies": {
@@ -11,10 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/webciter/setBackgroundCanvas.git#1.1.0"
+    "url": "git+https://github.com/webciter/setBackgroundCanvas.git#1.1.1"
   },
   "keywords": [
-    "canvas","transparency","video","image","stretch","title"
+    "canvas","transparency","video","image","stretch","tile","repeat"
   ],
   "author": "David Clews",
   "license": "MIT",
