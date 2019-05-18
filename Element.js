@@ -5,8 +5,6 @@
 require('array-functions-min');
 require('dom_token_list-functions-contains_all');
 
-window.MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
-
 
 /*
  * setBackgroundCanvas
