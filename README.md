@@ -71,7 +71,7 @@ You can access the reFresh function if you have any refreshing issues with
 element.canvas.reFresh();
 </pre>
 
-<h2>Event</h2>
+<h2>Events</h2>
 <h3>BackgroundCanvasLoaded</h3>
 
 <pre>
@@ -88,11 +88,23 @@ document.getElementById("your_block_level_element").addEventListener("Background
 
 </pre>
 
+<h3>BackgroundCanvasChanged</h3>
+
+Triggered when a chnage to the canvas object.
+
 <h2>Requires</h2>
 
 <pre>
 containsAll https://github.com/webciter/containsAll
 arrayMin https://github.com/webciter/arrayMin
+</pre>
+
+<h2>Optional</h2>
+
+By including this module you will get an extra reFresh call.
+
+<pre>
+classListMonitor https://github.com/webciter/classListMonitor
 </pre>
 
 <h2>Installation</h2>
@@ -155,6 +167,36 @@ To reposition the image use two classes on the canvas element, both x and y clas
  document.getElementById("your_block_level_element").canvas.element.classList.add("xx yy");
 
 </pre>
- 
+
+<h2>Levels</h2>
+
+Levels were added for manipulation of pixels just in case there is some chroma pixels remaining.
+The class of levels must be added to the Element or it will be ignored
+
+<pre>
+document.getElementById("your_block_level_element").canvas.element.levels.red = 1; /* 0.0 - 2.0 */
+document.getElementById("your_block_level_element").canvas.element.levels.green = 1; /* 0.0 - 2.0 */
+document.getElementById("your_block_level_element").canvas.element.levels.blue = 1; /* 0.0 - 2.0 */
+</pre>
+
+
+<h2>Chroma Key</h2>
+
+Apply a color of chroma key to the video or image the class of chromaKey must be added to the canvas element to function, make sure you slect the exact colour of the chroma key.
+
+<pre>
+document.getElementById("your_block_level_element").canvas.element.chromaKey = {red: 0, green: 255, blue:0};
+</pre>
+
+<h2>Chroma Variance</h2>
+
+Apply an amount of chroma variance to the video or image the class of chromaKey must be added to the canvas element to function
+
+<pre>
+document.getElementById("your_block_level_element").canvas.element.chromaVariance = 300;
+</pre>
+
+
+
 
  
