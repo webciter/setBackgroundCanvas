@@ -4,6 +4,8 @@ Sets an Image or GLSLFragmentShader as the background of any Element using a sin
 This functions allows you to apply a Image or GLSLFragmentShader behind all element children. By using this function you will have far more control. The main reason for this was to allow opacity over an still background image without effecting nested elements. 
 Now each nested element can have its own alpha use setAlpha project for this. Use the opacity rule for the canvas.
 
+Make sure your parent Element has the CSS rule <b>position: relative;</b>.
+
 <h2>Image Example</h2>
 <pre>
         /* create the image */
