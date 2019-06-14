@@ -6,6 +6,8 @@ Now each nested element can have its own alpha use setAlpha project for this. Us
 
 Make sure your parent Element has the CSS rule <b>position: relative;</b>.
 
+ <a href="http://davidclews.com/applications/programming/setBackgroundCanvas/3.0.0/">Demostration Site</a>
+
 <h2>Image Example</h2>
 <pre>
         /* create the image */
