@@ -1,6 +1,6 @@
 /* 
  * @author David Clews
- * @version 2.0.0
+ * @version 3.0.0
  * @authorUrl http://davidclews.com
  * @repositoryUrl https://github.com/webciter/setBackgroundCanvas
 */
@@ -8,7 +8,7 @@
 require('array-functions-min');
 require('dom_token_list-functions-contains_all');
 
-/*
+/* 
  * setBackgroundCanvas
  * 
  * Creates a 100% canvas behind all the other elements within a block level element
@@ -22,6 +22,7 @@ Element.prototype.setBackgroundCanvas = function(object){
     self = this,
     backgroundCanvasLoadedEvent = new Event('BackgroundCanvasLoaded'),
     backgroundCanvasChangedEvent = new Event('BackgroundCanvasChanged'),
+    backgroundCanvasCachedEvent = new Event('BackgroundCanvasCached'),
 
     x = {
         l: 0, /* left*/
@@ -34,24 +35,26 @@ Element.prototype.setBackgroundCanvas = function(object){
         b: 0, /* bottom */
     }
     
-    /* hold the object sent into the function */
-    self.backgroundCanvasObject = object;
-    
-    self.i = 0;
-    
-    self.chromaVariance = 300; /* chroma key variance */
-    
-    self.chromaKey = 
-    {   
-        red: 58, /* 0 - 255 */
-        green: 228, /* 0 - 255 */
-        blue:31 /* 0 - 255 */
-    };
-    
-    self.levels = {   
-        red: 1, /* 0 - 2 */
-        green: 1, /* 0 - 2 */
-        blue: 1 /* 0 - 2 */
+    self.version = "3.0.0";
+
+    self.backgroundCanvas = {
+        opacity: .8,
+        fps: 60,
+        i: 0,
+        backgroundCanvasObject: object,
+        chromaVariance: 300,
+        chromaKey:
+        {   
+            red: 0, /* 0 - 255 */
+            green: 255, /* 0 - 255 */
+            blue: 0 /* 0 - 255 */
+        },
+        levels: {   
+            red: 1, /* 0 - 2 */
+            green: 1, /* 0 - 2 */
+            blue: 1 /* 0 - 2 */
+        },
+        
     };
     
 
@@ -65,41 +68,65 @@ Element.prototype.setBackgroundCanvas = function(object){
      */
     
     let     elementWidth, 
-            elementHeight;
+            elementHeight,
+            rAF = null,
+            resizeTimeout = null,
+            rAFTimeout = null;
     
-    /* allow the canvas to be accessed externally */
-    self.canvas = {
-        element: document.createElement("canvas"),
-        hiddenCanvas: document.createElement("canvas")
-    };
-    
-    /* inherit the rules of the parent for cascading */
+    /*
+     * initNewCanvas
+     * 
+     * @returns {undefined}
+     */
+    let initNewCanvas = function(){
+        
+        
+        self.canvas = {
+            element: document.createElement("canvas"),
+            hiddenCanvas: document.createElement("canvas")
+        };
 
-    self.canvas.element.style.cssText = 
-        `
-        border: inherit;
-       
-        border-top-color: inherit;
-        border-right-color: inherit;
-        border-bottom-color: inherit;
-        border-left-color: inherit;
+
+        /* inherit the rules of the parent for cascading */
+
+        self.canvas.element.style.cssText = 
+            `
+            border: inherit;
+
+            border-top-color: inherit;
+            border-right-color: inherit;
+            border-bottom-color: inherit;
+            border-left-color: inherit;
+
+            border-radius: inherit;
+
+            border-top-style: inherit;
+            border-right-style: inherit;
+            border-bottom-style: inherit;
+            border-left-style: inherit;
+
+            border-top-width: inherit;
+            border-right-width: inherit;
+            border-bottom-width: inherit;
+            border-left-width: inherit;
+            `;
+
+        /* create the contexts */
+        self.canvas.context = self.canvas.element.getContext("2d", {alpha: true});
+        self.canvas.hiddenContext = self.canvas.hiddenCanvas.getContext("2d", {alpha: true});
+
+        self.canvas.context.globalCompositeOperation = 'source-in';
+        self.canvas.element.style.opacity = self.backgroundCanvas.opacity;
         
-        border-radius: inherit;
-         
-        border-top-style: inherit;
-        border-right-style: inherit;
-        border-bottom-style: inherit;
-        border-left-style: inherit;
+        self.canvas.element.classList.add("backgroundCanvas");
+        self.backgroundCanvas.id = "bGC_"+Math.floor(Math.random() * (99999 - 10000));
+        self.canvas.element.id = self.backgroundCanvas.id;
+        self.appendChild(self.canvas.element);
         
-        border-top-width: inherit;
-        border-right-width: inherit;
-        border-bottom-width: inherit;
-        border-left-width: inherit;
-        `;
+        _reDraw = function(){};
+    }
     
-    /* create the contexts */
-    self.canvas.context = self.canvas.element.getContext("2d", {alpha: true});
-    self.canvas.hiddenContext = self.canvas.element.getContext("2d", {alpha: true});
+    initNewCanvas();
     
     /* 
      * calculateZIndex
@@ -131,7 +158,7 @@ Element.prototype.setBackgroundCanvas = function(object){
     let calculatePositions = function(){
         /* bring the canvas into scope */
         let a = self.canvas.element,
-            b = self.backgroundCanvasObject;
+            b = self.backgroundCanvas.backgroundCanvasObject;
         
         x.l = 0;
         x.c = Math.floor(a.width/2 - (b.width/2 !== 0 ? b.width/2 : b.videoWidth/2));
@@ -171,8 +198,8 @@ Element.prototype.setBackgroundCanvas = function(object){
         }
 
         if(xy === null){
-            throw "Unable to detect background position classes in canvas";
             return [0,0];
+            throw "Unable to detect background position classes in canvas";
 
         }else{
             return xy;
@@ -182,119 +209,157 @@ Element.prototype.setBackgroundCanvas = function(object){
     /* hoist this function */
     var _reDraw = null;
     
-    
     /*
      * detectElementType
      * 
-     * Detects what type of Element was passed in and creates the _reDraw function
+     * Detects what type of Element was passed in and creates the _reDraw function, 
+     * this function remove any imcompatible events from the object
      * @returns {undefined}
      */
     let detectElementType = function(){
-        /* image */
-        if(self.backgroundCanvasObject instanceof HTMLImageElement){
-            let     canvas = self.canvas.element,
-                    context = self.canvas.context;
-                    hiddenContext = self.canvas.hiddenContext;
-                    
-            window.addEventListener("load", function(event){
-                setTimeout(function(){
-                    reFresh(); 
-                }, 3000);
-            });
-            
-            /* still image redraw */
-            _reDraw = function(){
+        
+        /*
+         * _fragment1
+         * 
+         * @param {array} a The filters to apply
+         * @param {HTMLCanvasElement} b The canvas
+         * @param {CanvasRenderingContext2D} c context
+         * @param {CanvasRenderingContext2D} d hiddenContext
+         * @param {integer} e width
+         * @param {integer} f height
+         * @returns {undefined}
+         */
+        let _fragment1 = function(a, b, c, d, e, f){
+            /* detect repeat */ 
+            if(b.classList.contains("xx") && b.classList.contains("yy") === false){
+                /* x axis only */
+                processCanvasRepeat(d, c, a, 0, 0, b.width, f, elementWidth, elementHeight);
+            }else if(b.classList.contains("xx") === false && b.classList.contains("yy")){
+                /* y axis only */
+                processCanvasRepeat(d, c, a, 0, 0, e, b.height, elementWidth, elementHeight);
+            }else if(b.classList.containsAll("xx yy")){
+                /* x and y axis */
+                processCanvasRepeat(d, c, a, 0, 0, b.width, b.height, elementWidth, elementHeight);
+            }else if(b.classList.contains("x-x")){
+                /* stretch x */
+                processCanvas(d, c, a, 0, 0, e, f, 0, 0, elementWidth, f);
+            }else if(b.classList.containsAll("y-y")){
+                /* stretch y */
+                processCanvas(d, c, a, 0, 0, e, f, 0, 0, e, elementHeight);
+            }else if(b.classList.containsAll("xy-xy")){
+                /* x and y axis stretch */
 
-                let width = self.backgroundCanvasObject.width,
-                    height = self.backgroundCanvasObject.height;
-                    canvas.style.zIndex = calculateZIndex();
-                    /* update the new position */
-                    calculatePositions();
+                processCanvas(d, c, a, 0, 0, e, f, 0, 0, elementWidth, elementHeight);
+            }else{
+                /* no repeat - no stretch */
 
-                    let w = detectFilters();
+                /* get the position classes */
+                let xy = getCoordinates();
 
-                    /* detect repeat */ 
-                    if(canvas.classList.contains("xx") && canvas.classList.contains("yy") === false){
-                        /* x axis only */
-                        processCanvasRepeat(hiddenContext, context, w, 0, 0, canvas.width, height, elementWidth, elementHeight);
-                    }else if(canvas.classList.contains("xx") === false && canvas.classList.contains("yy")){
-                        /* y axis only */
-                        processCanvasRepeat(hiddenContext, context, w, 0, 0, width, height, elementWidth, elementHeight);
-                    }else if(canvas.classList.containsAll("xx yy")){
-                        /* x and y axis */
-                        processCanvasRepeat(hiddenContext, context, w, 0, 0, canvas.width, canvas.height, elementWidth, elementHeight);
-                    }else if(canvas.classList.contains("x-x")){
-                        /* stretch x */
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, 0, 0, elementWidth, height);
-                    }else if(canvas.classList.containsAll("y-y")){
-                        /* stretch y */
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, 0, 0, width, elementHeight);
-                    }else if(canvas.classList.containsAll("xy-xy")){
-                        /* x and y axis stretch */
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
-                    }else{
-                        /* no repeat - no stretch */
-
-                        /* get the position classes */
-                        let xy = getCoordinates();
-
-                        //context.drawImage(self.backgroundCanvasObject, xy[0], xy[1]);
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, xy[0], xy[1], width, height);
-                    }
-
-
+                processCanvas(d, c, a, 0, 0, e, f, xy[0], xy[1], e, f);
             }
-        }else if(self.backgroundCanvasObject instanceof HTMLVideoElement){
-            let     canvas = self.canvas.element,
-                    context = self.canvas.context,
-                    hiddenContext = self.canvas.hiddenContext;
-            self.backgroundCanvasObject.addEventListener("play", function(event){
-               reFresh(); 
-            });
-            
-            /* video redraw */
-            _reDraw = function(){
-                let width = self.backgroundCanvasObject.videoWidth,
-                    height = self.backgroundCanvasObject.videoHeight;
-                    canvas.style.zIndex = calculateZIndex();
-                    /* update the new position */
-                    calculatePositions();
-                    
-                    let w = detectFilters( );
+        } 
+        
+        try{
+            /* image */
+            if(self.backgroundCanvas.backgroundCanvasObject instanceof HTMLImageElement){
+                let     canvas = self.canvas.element,
+                        context = self.canvas.context,
+                        hiddenContext = self.canvas.hiddenContext;
 
+                window.addEventListener("load", function(event){
+                    setTimeout(function(){
+                        reFresh(); 
+                    }, 3000);
+                });
 
-                    /* detect repeat and stretch */ 
-                    if(canvas.classList.contains("xx") && canvas.classList.contains("yy") === false){
-                        /* x axis only */
-                        processCanvasRepeat(hiddenContext, context, w, 0, 0, canvas.width, height, elementWidth, elementHeight);
-                    }else if(canvas.classList.contains("xx") === false && canvas.classList.contains("yy")){
-                        /* y axis only */
-                        processCanvasRepeat(hiddenContext, context, w, 0, 0, width, canvas.height, elementWidth, elementHeight);
-                    }else if(canvas.classList.containsAll("xx yy")){
-                        /* x and y axis */
-                        processCanvasRepeat(hiddenContext, context, w, 0, 0, canvas.width, canvas.height, elementWidth, elementHeight);
-                    }else if(canvas.classList.contains("x-x")){
-                        /* stretch x */
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, 0, 0, elementWidth, height);
-                    }else if(canvas.classList.containsAll("y-y")){
-                        /* stretch y */
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, 0, 0, width, elementHeight);
-                    }else if(canvas.classList.containsAll("xy-xy")){
-                        /* x and y axis stretch */
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
-                    }else{
-                        /* no repeat - no stretch */
-                        let xy = getCoordinates();
-                        processCanvas(hiddenContext, context, w, 0, 0, width, height, xy[0], xy[1], width, height);
+                /* still image redraw */
+                _reDraw = function(){
+                    try{
+                        clearTimeout(rAFTimeout);
+
+                        let width = self.backgroundCanvas.backgroundCanvasObject.width,
+                            height = self.backgroundCanvas.backgroundCanvasObject.height;
+                            canvas.style.zIndex = calculateZIndex();
+                            /* update the new position */
+                            calculatePositions();
+
+                            let w = detectFilters();
+
+                            _fragment1(w, canvas, context, hiddenContext, width, height);
+                            
+                            
+                    }catch(err){
+                        /* image not ready */
+                        console.log("image not ready");
                     }
+                }
+           
+            }else if(self.backgroundCanvas.backgroundCanvasObject instanceof GLSLFragmentShader){
+
+                let     canvas = self.canvas.element,
+                        context = self.canvas.context,
+                        hiddenContext = self.canvas.hiddenContext;
+
+                let o = self.backgroundCanvas.backgroundCanvasObject.canvas;
+
+                /* remove the incompatible resize event */
+                window.removeEventListener("resize", self.backgroundCanvas.backgroundCanvasObject.onWindowResize);
+                self.backgroundCanvas.backgroundCanvasObject.onWindowResize();
+                
+                /* glsl redraw */
+                _reDraw = function(){
+                    clearTimeout(rAFTimeout);
+                    let width = self.backgroundCanvas.backgroundCanvasObject.width,
+                        height = self.backgroundCanvas.backgroundCanvasObject.height;
+                        canvas.style.zIndex = calculateZIndex();
+                        /* update the new position */
+                        calculatePositions();
+
+                        let w = detectFilters();
+
+                        _fragment1(w, canvas, context, hiddenContext, width, height);
+
+                }
+            }else{
+                /* remove object from element */
+                delete self.backgroundCanvas.backgroundCanvasObject;
+                throw "Unable to detect the Element Type";
             }
-        }else{
-            /* remove object from element */
-            delete self.backgroundCanvasObject;
-            throw "Unable to detect the Element Type";
+        }catch(err){
+            console.error(err);
         }
     }
     
+    /*
+     * animationControl
+     * 
+     * Controls the animation frame, removes duplicate code
+     * 
+     * @returns {undefined}
+     */
+    let animationControl = function(){
+        let o = self.backgroundCanvas;
+        
+        if(o.backgroundCanvasObject instanceof HTMLImageElement){
+            rAFTimeout = setTimeout(function() {
+                rAF = window.requestAnimationFrame(_reDraw);
+            }, 10000);
+        }else{
+            if(o.fps !== 60){
+                rAFTimeout = setTimeout(function() {
+                    rAF = window.requestAnimationFrame(_reDraw);
+                }, Math.floor(1000 / o.fps));
+                
+            }else{
+                /* run as fast as the browser can go capped at 60fps */
+                rAF = window.requestAnimationFrame(_reDraw);
+            }
+        }
+        
+    }
+    
+   
     /*
      * processCanvas
      * 
@@ -313,38 +378,52 @@ Element.prototype.setBackgroundCanvas = function(object){
      * 
      * @returns {undefined}
      */
-    var processCanvas = function(a, b, c, d = 0, e = 0, f = false, g = false, h = false, j = false, k = false, l = false){
-        window.requestAnimationFrame(_reDraw);
-                       
-        /* extract all the parameters for drawimage */
-        let m = Array.from(arguments).slice(3);
-        m.unshift(self.backgroundCanvasObject);
-            
-        /* remove undefined parameters (false) */
-        m.filter(Boolean);
+    let processCanvas = function(a, b, c, d = 0, e = 0, f = false, g = false, h = false, j = false, k = false, l = false){
+             
+        animationControl();      
         
-        /* extract hidden render variables  */
-        let n = [d, e, k, l];
-        n.filter(Boolean);
+        let o = self.backgroundCanvas.backgroundCanvasObject,
+            p = self.backgroundCanvas; /* shorthand */     
+       
+        /* code for HTMLVideoElement and HTMLImageElement*/
+        if(     o instanceof HTMLImageElement ||
+                o instanceof GLSLFragmentShader
+                ){
+            var n,u,m;
 
-        if(c.length >= 1){
-            // a.drawImage(self.backgroundCanvasObject, 0, 0, width, height, 0, 0, elementWidth, elementHeight);
+            /* extract all the parameters for drawimage */
+            m = Array.from(arguments).slice(3);
+            
+            /* get compatible object for drawImage */
+            if(o instanceof HTMLCanvasElement || 
+                    o instanceof HTMLImageElement){
+                m.unshift(o);
+            }else{
+                /* expect the canvas to be named canvas in the object */
+                m.unshift(o.canvas);
+            }
+
+            /* remove undefined parameters (false) */
+            m.filter(Boolean);
+
+            /* extract hidden render variables  */
+            n = [d, e, b.canvas.width, b.canvas.height];
+            n.filter(Boolean);
+
             a.drawImage.apply(a, m);
-            let x = a.getImageData.apply(a, n);
-
-            processPixels(x, c);
-
-            b.putImageData(x, d, e);
-            
-        }else{
-            /* draw to the canvas with no filters */
-            a.drawImage.apply(a, m);
-            let x = a.getImageData.apply(a, n);
-            
-            processPixels(x, c);
-            
-            b.putImageData(x, d, e);
+            u = a.getImageData.apply(a, n);
         }
+        
+        if(o instanceof HTMLImageElement){
+                /* image */
+                processPixels(u, c)
+                b.putImageData(u, d, e);
+            
+        }else if(o instanceof GLSLFragmentShader){
+                /* GLSL Fragment Shader */
+                b.putImageData(u, d, e);
+        }
+
     }
     
     
@@ -361,24 +440,32 @@ Element.prototype.setBackgroundCanvas = function(object){
      * @param {integer} h elementWidth
      * @param {integer} j elementHeight
      * 
-     * 
      * @returns {undefined}
      */
-    var processCanvasRepeat = function(a, b, c, d = 0, e = 0, f, g, h, j){
-        window.requestAnimationFrame(_reDraw);
-                       
-        a.fillStyle = b.createPattern(self.backgroundCanvasObject, "repeat");
+    let processCanvasRepeat = function(a, b, c, d = 0, e = 0, f, g, h, j){
+        
+        animationControl();
+        
+        let o = self.backgroundCanvas.backgroundCanvasObject,
+            p = self.backgroundCanvas; /* shorthand */
+        
+        if(o instanceof HTMLImageElement){
+            a.fillStyle = b.createPattern(o, "repeat");
+        }else if(o instanceof GLSLFragmentShader){
+            a.fillStyle = b.createPattern(o.canvas, "repeat");
+        }
+
         a.fillRect(d, e, f, g);
-                        
+
         let x = a.getImageData(d, e, h, j);
             
-        if(c.length >= 1){
+        if(o instanceof HTMLImageElement){
             
             processPixels(x, c);
             b.putImageData(x, 0, 0);
+            b.restore();
             
-        }else{
-            /* draw to the canvas with no filters */
+        }else if(o instanceof GLSLFragmentShader){
             b.putImageData(x, 0, 0);
         }
     }
@@ -390,10 +477,9 @@ Element.prototype.setBackgroundCanvas = function(object){
      * 
      * @return {array}
      * */
-    var detectFilters = function(){
-        let c = self.canvas.element;
-        
-        let f = [];
+    let detectFilters = function(){
+        let c = self.canvas.element,
+                f = [];
             
         if(c.classList.contains("chromaKey")){
             f.push("chromaKey");
@@ -406,6 +492,7 @@ Element.prototype.setBackgroundCanvas = function(object){
         return f;
         
     }
+    
     /*
      * adjustLevels
      * 
@@ -415,24 +502,24 @@ Element.prototype.setBackgroundCanvas = function(object){
      * @param {integer} i The nth position in a
      * @returns {undefined}
      */
-    var adjustLevels = function(a, i){
+    let adjustLevels = function(a, i){
         /* adjust the levels */
         let r,g,b;
         /* red */
-        if(self.levels.red !== 1){
-            r = (a.data[i] * self.levels.red);
+        if(self.backgroundCanvas.levels.red !== 1){
+            r = (a.data[i] * self.backgroundCanvas.levels.red);
             a.data[i] = r <= 255 ? r >= 0 ? r : 0 : 255;
         }
         
         /* green */
-        if(self.levels.green !== 1){
-            g = (a.data[i+1]  * self.levels.green);
+        if(self.backgroundCanvas.levels.green !== 1){
+            g = (a.data[i+1]  * self.backgroundCanvas.levels.green);
             a.data[i+1] = g <= 255 ? g >= 0 ? g : 0 : 255;
         }
         
         /* blue */
-        if(self.levels.blue !== 1){
-            b = (a.data[i+2] * self.levels.blue);
+        if(self.backgroundCanvas.levels.blue !== 1){
+            b = (a.data[i+2] * self.backgroundCanvas.levels.blue);
             a.data[i+2] = b <= 255 ? b >= 0 ? b : 0 : 255;
         }
         /* ignore alpha */
@@ -448,15 +535,21 @@ Element.prototype.setBackgroundCanvas = function(object){
      * 
      * @return {undefined}
      */
-    var processChromaKey = function(a, b, i){
+    let processChromaKey = function(a, b, i){
         /* loop through each pixel */
         /* z is the difference */
-        let z = Math.abs(a.data[i] - b[0]) + Math.abs(a.data[i+1] - b[1]) + Math.abs(a.data[i+2] - b[2]);
-        if(z < self.chromaVariance) {
-            a.data[i+3] = (z*z)/self.chromaVariance;
-        }                            
         
-    }
+        /* run on CPU */
+        let z = Math.abs(a.data[i] - b[0]) + Math.abs(a.data[i+1] - b[1]) + Math.abs(a.data[i+2] - b[2]);
+        if(z < self.backgroundCanvas.chromaVariance) {
+            a.data[i+3] = parseInt((z*z)/self.backgroundCanvas.chromaVariance);
+        }    
+
+        if(a.data[i] === 0 && a.data[i+1] === 0 && a.data[i+2] === 0){
+            a.data[i+3] = 0;
+        }
+        
+    }   
     
     /*
      * processPixels
@@ -467,35 +560,44 @@ Element.prototype.setBackgroundCanvas = function(object){
      * @param {array} b The filters to apply to the ImageData
      * @returns {undefined}
      */
-    var processPixels = function(a, b = []){
+    let processPixels = function(a, b = []){
         /* z = chroma key data */
-        let z = [self.chromaKey.red, self.chromaKey.green, self.chromaKey.blue];
+        let z = [self.backgroundCanvas.chromaKey.red, self.backgroundCanvas.chromaKey.green, self.backgroundCanvas.chromaKey.blue];
         /* loop through each pixel */
         /* step 4 positions for a single pixel */
-        for(
+       
+
+            /* run on the CPU */
+            for(
                 let i = 0;
                 i<a.data.length;
                 i+=4){
-                     
-            if(b.indexOf("chromaKey") !== -1){
-                processChromaKey(a, z, i)
-            }else if(b.indexOf("levels") !== -1){
-                adjustLevels(a, i);
-            }
 
-        }
+                if(b.indexOf("chromaKey") !== -1){
+                    processChromaKey(a, z, i)
+                }else if(b.indexOf("levels") !== -1){
+                    adjustLevels(a, i);
+                }
+
+            }  
+     
     }
     
-    
-    var reFresh = function(event){
+    /* 
+     * reFresh
+     * 
+     */
+    let reFresh = function(event){
         let     canvas = self.canvas.element,
                 hiddenCanvas = self.canvas.hiddenCanvas,
                 styles = window.getComputedStyle(self), 
-                replace = /[px]/g;
+                replace = /[px]/g;       
         
+         
         /* updates the canvas based on media queries and resize */
         elementWidth = Math.ceil(styles.getPropertyValue("width").replace(replace,'')-styles.getPropertyValue("border-left-width").replace(replace,'')-styles.getPropertyValue("border-right-width").replace(replace,''));
         elementHeight = Math.ceil(styles.getPropertyValue("height").replace(replace,'')-styles.getPropertyValue("border-top-width").replace(replace,'')-styles.getPropertyValue("border-bottom-width").replace(replace,''));
+        
         canvas.setAttribute("width", elementWidth+"px");
         canvas.setAttribute("height", elementHeight+"px");
         
@@ -507,7 +609,11 @@ Element.prototype.setBackgroundCanvas = function(object){
         canvas.style.left = "-"+styles.getPropertyValue("border-left-width").replace(replace,'')+"px";
         canvas.style.top = "-"+styles.getPropertyValue("border-top-width").replace(replace,'')+"px";
         
+        canvas.style.opacity = self.backgroundCanvas.opacity;
+                                
+
         _reDraw();
+         
     };
     
     /*
@@ -523,44 +629,99 @@ Element.prototype.setBackgroundCanvas = function(object){
     
     /* when the window resizes recalculate the width and height */
     window.addEventListener("resize", function(event){
-        /* its not very accurate but works */
-        setTimeout(function(){reFresh();}, 200);
+        self.canvas.element.style.opacity = 0;
+
+        clearTimeout(resizeTimeout);
+        clearTimeout(rAFTimeout);
+        cancelAnimationFrame(rAF);
+
+        resizeTimeout = setTimeout(function(){reFresh();
+            if(self.backgroundCanvas.backgroundCanvasObject instanceof GLSLFragmentShader){
+                self.backgroundCanvas.backgroundCanvasObject.onWindowResize();
+            }
+            
+            self.canvas.element.style.opacity = self.backgroundCanvas.opacity;
+
+        }, 250);
+        
     });
     
-    /* ClassListChanged */
-    
-    /* its ok to add this functionality like this if the event does not exist it will still work */
+    let classListTimeout = null;
+
+    /* ClassListChanged 
+     * 
+     * its ok to add this functionality like this if the event does not exist it will still work
+     * @param {Event} event 
+     * @return {undefined}
+     */
     self.addEventListener("ClassListChanged", function(event){
-        reFresh();
+        // make sure this event is not fired to many times, this will stop the gittering effect of the GLSLFragmentShader's running 
+        if(classListTimeout !== null){
+            return;
+        }
+        
+        classListTimeout  = setTimeout(function(){
+            let a = self.backgroundCanvas;
+            reFresh();
+            classListTimeout = null;
+        }, 100);        
     });
     
-    /* tell the view when the background canvas has been added */ 
-    
-    self.appendChild(self.canvas.element);
-    self.canvas.element.classList.add("backgroundCanvas");
-    
+
+    /*
+     * destroyBackgroundCanvas
+     * 
+     * Cleanup previous backgroundCanvas
+     * 
+     * @param {type} a
+     * @returns {undefined}
+     */
+    self.destroyBackgroundCanvas = function(){
+        
+        if(typeof self.backgroundCanvas.backgroundCanvasObject.destroy === "function"){
+            self.backgroundCanvas.backgroundCanvasObject.destroy();
+        }   
+        
+        cancelAnimationFrame(rAF);
+        clearTimeout(resizeTimeout);
+        clearTimeout(rAFTimeout);
+                    
+        delete self.backgroundCanvas.backgroundCanvasObject;
+        
+        document.getElementById(self.backgroundCanvas.id).remove();
+
+    }
     
     /**
      * changeBackgroundCanvas
      * 
      * Change the background canvas object
      * 
-     * @param {HTMLImageElement|HTMLVideoElement} object
+     * @param {HTMLImageElement|HTMLVideoElement|GLSLFragmentShader} a 
      * @returns {undefined}
      */
-    self.changeBackgroundCanvas = function(object){
-        if(object instanceof HTMLImageElement){
-            self.backgroundCanvasObject = object;
+    self.changeBackgroundCanvas = function(a){
+        let o = self.backgroundCanvas.backgroundCanvasObject,
+            p = self.backgroundCanvas;
+        
+        if(a instanceof HTMLImageElement){
+            
+            self.backgroundCanvas.backgroundCanvasObject = a;
+            initNewCanvas();
+
             detectElementType();
             self.dispatchEvent(backgroundCanvasChangedEvent);
 
-        }else if(object instanceof HTMLVideoElement){
-            self.backgroundCanvasObject = object;
+        }else if(a instanceof GLSLFragmentShader){
+
+            self.backgroundCanvas.backgroundCanvasObject = a;
+            initNewCanvas();
+
             detectElementType();
-            self.dispatchEvent(backgroundCanvasChangedEvent);
+            self.dispatchEvent(backgroundCanvasChangedEvent);  
 
         }else{
-            delete self.backgroundCanvasObject;
+            delete self.backgroundCanvas.backgroundCanvasObject;
             throw "Unable to detect the Element Type";
         }
     }
@@ -568,11 +729,9 @@ Element.prototype.setBackgroundCanvas = function(object){
     self.addEventListener("BackgroundCanvasChangedEvent", function(){
         reFresh();
     });
-    
 
-    // Dispatch the event.
+    // tell the caller Class has been Loaded
     self.dispatchEvent(backgroundCanvasLoadedEvent);
-    
     
     /* done */
     reFresh();
